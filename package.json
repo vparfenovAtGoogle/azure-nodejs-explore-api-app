@@ -1,0 +1,21 @@
+{
+  "name": "azure-nodejs-explore-api-app",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "azure-batch": "^8.0.0",
+    "azure-storage": "^2.10.3",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "dotenv": "^8.1.0",
+    "express": "~4.16.1",
+    "hbs": "~4.0.4",
+    "http-errors": "~1.6.3",
+    "mongodb": "^3.3.2",
+    "morgan": "~1.9.1",
+    "ws": "^7.1.2"
+  }
+}

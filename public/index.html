@@ -1,0 +1,111 @@
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Quicksand" />
+        <link rel="stylesheet" type="text/css" href="libs/css/pretty-json.css" />
+        
+        <script type="text/javascript" src="libs/jquery-3.3.1.min.js" ></script>
+        <script type="text/javascript" src="libs/underscore-min.js" ></script>
+        <script type="text/javascript" src="libs/backbone-min.js" ></script>
+        <script type="text/javascript" src="libs/pretty-json-min.js" ></script>
+        <script type="text/javascript" src="javascripts/ptc-api-call.js"></script>
+
+        <script>
+
+            function queryInput () {return document.getElementById ("query")}
+            function execButton () {return document.getElementById ("exec")}
+            function outputArea () {return document.getElementById ("output")}
+    
+            function showJson (obj) {
+               return new PrettyJSON.view.Node({ 
+                        el:outputArea (), 
+                        data:obj
+                    });
+            }
+            function clearOutput () {
+                outputArea ().innerHTML = ""
+            }
+    
+            var lineStack = [];
+            var lineCurrent = -1;
+    
+            function lineStackUp() {
+                if (lineCurrent < lineStack.length-1) {
+                    queryInput ().value = lineStack [++lineCurrent]
+                }
+            }
+    
+            function lineStackDown() {
+                if (lineCurrent > 0) {
+                    queryInput ().value = lineStack [--lineCurrent]
+                }
+            }
+    
+            function selectScriptLine () {
+                queryInput ().setSelectionRange(0, queryInput ().value.length)
+            }
+    
+            function scriptLineKeyEvent(event) {
+                //alert ("pushed " + event.keyCode)
+                switch (event.keyCode) {
+                    /* F1    */ case 112: event.preventDefault(); executeQueryLine('?'); break;
+                    /* Enter */ case 13: event.preventDefault(); executeQueryLine(); break;
+                    /* Up    */ case 38: event.preventDefault(); lineStackDown(); break;
+                    /* Down  */ case 40: event.preventDefault(); lineStackUp(); break;
+                }
+            }
+    
+            function executeQueryLine(script) {
+                script = script || queryInput ().value
+                if (script) {
+                    script = script.trim()
+                    if (script === '?') {
+                        var lines = []
+                        for (var idx=0; idx < lineStack.length; idx++) {
+                            lines.push ('' + idx + ': ' + lineStack [idx])
+                        }
+                        showJson (lines).expandAll ()
+                    }
+                    else {
+                        var index = parseInt (script)
+                        if (index >=0 && index < lineStack.length) {
+                            queryInput ().value = lineStack [index]
+                            executeQueryLine()
+                            return
+                        }
+                        executeQuery()
+                        if ((lineCurrent > -1) && (lineCurrent < lineStack.length) && (script === lineStack [lineCurrent])) {
+                        lineCurrent++
+                        }
+                        else {
+                        lineStack.push (script);
+                        if (lineStack.length > 50) {
+                            lineStack.splice (0, lineStack.length - 50)
+                        }
+                        lineCurrent = lineStack.length
+                        }
+                    }
+                }
+                queryInput ().focus()
+            }
+            
+            function executeQuery () {
+                callAPIByString (queryInput ().value)
+                    .done (function (res) {
+                        showJson (res).expandAll ()
+                    })
+            }
+        </script>
+    </head>
+    <body>
+        <h4>Testing Azure APIs</h4>
+        Query: <input style="width: 90%" id="query" type="text" value="env">
+        <button id="exec" onclick="executeQueryLine ()">Exec</button>
+        <button onclick="clearOutput()">Clear</button>
+        <div>
+            <span id="output"></span>
+        </div>
+        <script>
+            queryInput ().onkeyup = scriptLineKeyEvent
+        </script>
+    </body>
+</html>
