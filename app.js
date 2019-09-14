@@ -5,14 +5,15 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var WebSocket = require ('ws')
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
-var app = express();
+var app = express()
+var server = require('http').Server(app);
+var expressWs = require('express-ws')(app, server)
 
-// view engine setup
+ // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
@@ -24,6 +25,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+
+var wsRouter = require('./ws-tests');
+app.use('/ws', wsRouter);
 
 const apiRouter = require ('./ptc-api-router') (require ('./apis'))
 
@@ -45,15 +49,4 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-const wsPort = parseInt (process.env.PORT || '3000') + 1
-
-const wss = new WebSocket.Server({ port: wsPort })
- 
-wss.on('connection', ws => {
-  ws.on('message', message => {
-    console.log(`Received message => ${message}`)
-  })
-  ws.send(JSON.stringify ({msg:'Hello! Message From Server!!'}))
-})
-
-module.exports = app;
+module.exports = {app, server}
