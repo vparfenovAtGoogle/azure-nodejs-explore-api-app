@@ -11,7 +11,7 @@ Use this repo as a starting point for your experiments with Azure Services in No
 ```
 $ git clone --bare https://github.com/vparfenovAtGoogle/azure-nodejs-explore-api-app.git
 ```
-3. Mirror-push to the new repository.
+3. Mirror-push to the your own new repository.
 ```
 $ cd azure-nodejs-explore-api-app.git
 $ git push --mirror https://github.com/yourusername/your-repository-name.git
